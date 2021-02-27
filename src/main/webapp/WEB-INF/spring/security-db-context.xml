@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<http auto-config="true" use-expressions="true">
+		<!-- 제한은 좁은데서 큰쪽으로와야 좁은 권한부터 체크한다 (큰데서 좁은데 오면 밑에는 안먹힘 예를 들어 Exception처럼 에러 조상님 선언하면 밑에 하위에러 처리해도 안먹는것처럼) -->
+		<intercept-url pattern="/login/loginForm" access="permitAll" />
+		<intercept-url pattern="/" access="permitAll" />
+		<intercept-url pattern="/admin/**" access="hasRole('ADMIN')" /> <!-- ROLE_MEMBER 권한을 가진 사람만 접근 허용 -->
+		<intercept-url pattern="/**" access="hasAnyRole('USER, ADMIN')" />
+	
+		<form-login login-page="/login/loginForm"
+		default-target-url="/"
+		authentication-failure-url="/login/loginForm?error"
+		username-parameter="id" 
+		password-parameter="password" />
+     
+		<logout logout-url="/logout" logout-success-url="/" /> 
+		
+		<!-- 403에러처리 -->
+		<access-denied-handler error-page="/login/accessDenied"/>
+	</http>
+	
+	<beans:bean id="userDetailsService" class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">
+        <beans:property name="dataSource" ref="dataSource"/>
+    </beans:bean> 
+    
+   <beans:bean id="customNoOpPasswordEncoder" class="edu.bit.ex.security.CustomNoOpPasswordEncoder"/>
+   
+	<!-- provider --> 
+   <authentication-manager>
+      <authentication-provider> 
+         <password-encoder ref="customNoOpPasswordEncoder"/> 
+         <jdbc-user-service 
+               data-source-ref="dataSource"
+             
+           /> 
+      </authentication-provider>
+   </authentication-manager>
+
+</beans:beans>

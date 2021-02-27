@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<http>
+		<intercept-url pattern="/security/all" access="permitAll" /> <!-- 모두 접근 허용 -->
+		<intercept-url pattern="/security/member" access="hasRole('ROLE_MEMBER')" /> <!-- ROLE_MEMBER 권한을 가진 사람만 접근 허용 -->
+		<intercept-url pattern="/security/admin" access="hasRole('ROLE_ADMIN')" />
+	
+		<form-login login-page="/login/loginForm"
+		default-target-url="/"
+		authentication-failure-url="/login/loginForm?error"
+		username-parameter="id" password-parameter="password" />
+      
+		<!-- login폴더안에 loginForm.jsp가 아니고 로그인 인증을 처리할 주소!! Controller 처리 주소
+		default-target-url : 로그인이 완료되면 default-target-url로 이동 (이거 사용안해도 디폴트로 "/"로 이동) -->
+		
+		<logout logout-url="/logout" logout-success-url="/" /> 
+		
+		
+		
+		<!-- 403에러처리 -->
+		<access-denied-handler error-page="/security/accessError"/>
+	</http>
+
+	<!-- provider -->
+	<authentication-manager>
+		<authentication-provider>
+			<user-service>
+				<user name="member" password="{noop}member" authorities="ROLE_MEMBER" />
+				<user name="manager" password="{noop}manager" authorities="ROLE_MEMBER" />
+				<user name="admin" password="{noop}admin" authorities="ROLE_MEMBER,ROLE_ADMIN" /> <!-- 권한을 2개 줄수도 O -->
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+
+</beans:beans>
